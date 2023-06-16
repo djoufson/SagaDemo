@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32804.467
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{62C4B5BA-1A39-4209-8D54-21F25C7007FF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.EmailService", "src\SagaDemo.EmailService\SagaDemo.EmailService.csproj", "{EA9F518B-9C95-4844-91E5-1FCC047BB450}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.Orchestrator", "src\SagaDemo.Orchestrator\SagaDemo.Orchestrator.csproj", "{A8F876EB-89BD-404C-9994-8D6BA9368ACC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.OrderService", "src\SagaDemo.OrderService\SagaDemo.OrderService.csproj", "{FB67E552-6314-4DF9-86C4-3A1BD297CFA4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.PaymentService", "src\SagaDemo.PaymentService\SagaDemo.PaymentService.csproj", "{E79315D2-C3EC-4267-9B29-1CBF554F29E0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EA9F518B-9C95-4844-91E5-1FCC047BB450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA9F518B-9C95-4844-91E5-1FCC047BB450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA9F518B-9C95-4844-91E5-1FCC047BB450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA9F518B-9C95-4844-91E5-1FCC047BB450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8F876EB-89BD-404C-9994-8D6BA9368ACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8F876EB-89BD-404C-9994-8D6BA9368ACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8F876EB-89BD-404C-9994-8D6BA9368ACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8F876EB-89BD-404C-9994-8D6BA9368ACC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB67E552-6314-4DF9-86C4-3A1BD297CFA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB67E552-6314-4DF9-86C4-3A1BD297CFA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB67E552-6314-4DF9-86C4-3A1BD297CFA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB67E552-6314-4DF9-86C4-3A1BD297CFA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E79315D2-C3EC-4267-9B29-1CBF554F29E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E79315D2-C3EC-4267-9B29-1CBF554F29E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E79315D2-C3EC-4267-9B29-1CBF554F29E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E79315D2-C3EC-4267-9B29-1CBF554F29E0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EA9F518B-9C95-4844-91E5-1FCC047BB450} = {62C4B5BA-1A39-4209-8D54-21F25C7007FF}
+		{A8F876EB-89BD-404C-9994-8D6BA9368ACC} = {62C4B5BA-1A39-4209-8D54-21F25C7007FF}
+		{FB67E552-6314-4DF9-86C4-3A1BD297CFA4} = {62C4B5BA-1A39-4209-8D54-21F25C7007FF}
+		{E79315D2-C3EC-4267-9B29-1CBF554F29E0} = {62C4B5BA-1A39-4209-8D54-21F25C7007FF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {829F3457-4237-4624-A3C5-A68E802B2AB6}
+	EndGlobalSection
+EndGlobal
