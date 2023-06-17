@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using SagaDemo.AuthService.Contracts;
 using SagaDemo.AuthService.Dtos;
 using SagaDemo.AuthService.Models;
+using SagaDemo.AuthService.Services.RabbitMq;
 using SagaDemo.AuthService.Services.Users;
 
 namespace SagaDemo.AuthService.Controllers;
@@ -8,10 +10,17 @@ namespace SagaDemo.AuthService.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IBroadcastClient _broadcastClient;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IUserService userService)
+    public AuthController(
+        IUserService userService,
+        IBroadcastClient broadcastClient,
+        ILogger<AuthController> logger)
     {
         _userService = userService;
+        _broadcastClient = broadcastClient;
+        _logger = logger;
     }
 
     [HttpPost("login")]
@@ -40,6 +49,14 @@ public class AuthController : ControllerBase
 
         _ = await _userService.RegisterUserAsync(user);
 
+        try
+        {
+            await _broadcastClient.PublishUserRegisteredAsync(new UserRegistered(user.Id, user.Name, user.Email, UserRegistered.EventType));
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while attempting to publish the event");
+        }
         string? token = await _userService.LoginUserAsync(user.Email, user.Password);
         return Ok(new { user, token });
     }

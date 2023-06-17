@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SagaDemo.AuthService.Configurations;
 using SagaDemo.AuthService.Data;
 using SagaDemo.AuthService.Services.Authentication;
+using SagaDemo.AuthService.Services.RabbitMq;
 using SagaDemo.AuthService.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,8 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>());
+builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
+builder.Services.AddSingleton<IBroadcastClient, BroadcastClient>();
 
 var app = builder.Build();
 app.SeedData();
