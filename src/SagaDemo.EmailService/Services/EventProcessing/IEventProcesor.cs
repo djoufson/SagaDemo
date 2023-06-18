@@ -1,4 +1,4 @@
-namespace SagaDemo.OrderService.EventProcessing;
+namespace SagaDemo.EmailService.Services.EventProcessing;
 
 public interface IEventProcessor
 {

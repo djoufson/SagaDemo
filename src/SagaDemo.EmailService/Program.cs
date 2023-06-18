@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.EmailService.Configurations;
 using SagaDemo.EmailService.Data;
-using SagaDemo.EmailService.EventProcessing;
-using SagaDemo.EmailService.Services;
+using SagaDemo.EmailService.Services.EventProcessing;
+using SagaDemo.EmailService.Services.Jobs;
+using SagaDemo.EmailService.Services.Orchestrator;
 using SagaDemo.EmailService.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,8 +16,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
 builder.Services.AddSingleton<IEventProcessor, BroadcastEventProcessor>();
+builder.Services.AddSingleton<IOrchestratorClient, OrchestratorClient>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHostedService<BroadcastSubscriber>();
+builder.Services.AddHostedService<OrchestratorSubscriber>();
 builder.Services.AddDbContext<EmailDbContext>(options => 
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));

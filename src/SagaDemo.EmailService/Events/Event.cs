@@ -2,5 +2,5 @@ namespace SagaDemo.EmailService.Events;
 
 public class Event
 {
-    public string EventName { get; set; } = null!;
+    public virtual string EventName { get; set; } = "Event";
 }

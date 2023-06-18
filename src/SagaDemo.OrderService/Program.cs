@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.OrderService.Configurations;
 using SagaDemo.OrderService.Data;
-using SagaDemo.OrderService.EventProcessing;
 using SagaDemo.OrderService.Persistence.Orders;
 using SagaDemo.OrderService.Persistence.Products;
 using SagaDemo.OrderService.Persistence.Users;
 using SagaDemo.OrderService.Services;
+using SagaDemo.OrderService.Services.EventProcessing;
 
 var builder = WebApplication.CreateBuilder(args);
 

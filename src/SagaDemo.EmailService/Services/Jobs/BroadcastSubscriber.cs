@@ -1,10 +1,10 @@
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using SagaDemo.OrderService.Configurations;
-using SagaDemo.OrderService.Services.EventProcessing;
+using SagaDemo.EmailService.Configurations;
+using SagaDemo.EmailService.Services.EventProcessing;
 
-namespace SagaDemo.OrderService.Services;
+namespace SagaDemo.EmailService.Services.Jobs;
 
 public class BroadcastSubscriber : BackgroundService
 {
@@ -40,14 +40,9 @@ public class BroadcastSubscriber : BackgroundService
 
         _channel?.QueueBind(_queueName, "broadcast", "");
         if (_connection is not null)
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
+            _connection.ConnectionShutdown += (_, __) => _logger.LogWarning("RabbitMQ connection shut down");
 
         _logger.LogInformation("Successfully connected to RabbitMQ");
-    }
-
-    private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
-    {
-        _logger.LogWarning("RabbitMQ connection shut down");
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)

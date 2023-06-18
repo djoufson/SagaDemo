@@ -1,10 +1,10 @@
 namespace SagaDemo.EmailService.Events;
 
-public record UserRegistered(
-    Guid Id,
-    string Email,
-    string EventName
-)
+public sealed class UserRegistered : Event
 {
+    public Guid Id { get; init; }
+    public string Email { get; init; } = "";
+    public override string EventName => EventType;
+
     public const string EventType = nameof(UserRegistered);
 }

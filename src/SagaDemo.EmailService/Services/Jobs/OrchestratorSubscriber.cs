@@ -2,12 +2,12 @@ using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SagaDemo.EmailService.Configurations;
-using SagaDemo.EmailService.EventProcessing;
+using SagaDemo.EmailService.Services.EventProcessing;
 
-namespace SagaDemo.EmailService.Services;
+namespace SagaDemo.EmailService.Services.Jobs;
 
-public class BroadcastSubscriber : BackgroundService
-{
+public class OrchestratorSubscriber : BackgroundService
+{    
     private readonly IEventProcessor _eventProcessor;
     private readonly RabbitMqSettings _settings;
     private IConnection? _connection;
@@ -15,7 +15,7 @@ public class BroadcastSubscriber : BackgroundService
     private string? _queueName;
     private readonly ILogger<BroadcastSubscriber> _logger;
 
-    public BroadcastSubscriber(
+    public OrchestratorSubscriber(
         IEventProcessor eventProcessor,
         RabbitMqSettings rabbitMqSettings,
         ILogger<BroadcastSubscriber> logger)
@@ -26,7 +26,7 @@ public class BroadcastSubscriber : BackgroundService
         InitializeRabbitMq();
     }
 
-    public void InitializeRabbitMq()
+    private void InitializeRabbitMq()
     {
         var factory = new ConnectionFactory()
         {
@@ -35,19 +35,14 @@ public class BroadcastSubscriber : BackgroundService
         };
         _connection = factory.CreateConnection();
         _channel = _connection?.CreateModel();
-        _channel?.ExchangeDeclare("broadcast", ExchangeType.Fanout);
+        _channel?.ExchangeDeclare("orchestrator", ExchangeType.Direct);
         _queueName = _channel?.QueueDeclare().QueueName;
 
-        _channel?.QueueBind(_queueName, "broadcast", "");
-        if(_connection is not null)
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
-        
-        _logger.LogInformation("Successfully connected to RabbitMQ");
-    }
+        _channel?.QueueBind(_queueName, "orchestrator", "emailService");
+        if (_connection is not null)
+            _connection.ConnectionShutdown += (_, __) => _logger.LogWarning("RabbitMQ connection shut down");
 
-    private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
-    {
-        _logger.LogWarning("RabbitMQ connection shut down");
+        _logger.LogInformation("Successfully connected to RabbitMQ");
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -64,14 +59,5 @@ public class BroadcastSubscriber : BackgroundService
         _logger.LogCritical("Event received from the message broker");
         string message = Encoding.UTF8.GetString(e.Body.ToArray());
         _eventProcessor.Process(message);
-    }
-
-    public new void Dispose()
-    {
-        if(_channel?.IsOpen ?? false)
-        {
-            _channel?.Close();
-            _connection?.Close();
-        }
     }
 }

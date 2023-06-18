@@ -3,7 +3,7 @@ using SagaDemo.OrderService.Entities;
 using SagaDemo.OrderService.Events;
 using SagaDemo.OrderService.Persistence.Users;
 
-namespace SagaDemo.OrderService.EventProcessing;
+namespace SagaDemo.OrderService.Services.EventProcessing;
 
 public class BroadcastEventProcessor : IEventProcessor
 {
