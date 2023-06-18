@@ -15,7 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
-builder.Services.AddSingleton<IEventProcessor, BroadcastEventProcessor>();
+builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 builder.Services.AddSingleton<IOrchestratorClient, OrchestratorClient>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHostedService<BroadcastSubscriber>();

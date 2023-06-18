@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.PaymentService.Configurations;
 using SagaDemo.PaymentService.Data;
+using SagaDemo.PaymentService.Services.EventProcessing;
+using SagaDemo.PaymentService.Services.Jobs;
 using SagaDemo.PaymentService.Services.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +18,9 @@ builder.Services.AddDbContext<PaymentDbCOntext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));
 });
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
+builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddHostedService<OrchestratorSubscriber>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

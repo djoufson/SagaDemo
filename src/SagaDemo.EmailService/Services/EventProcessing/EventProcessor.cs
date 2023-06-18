@@ -5,11 +5,11 @@ using SagaDemo.EmailService.Services.Users;
 
 namespace SagaDemo.EmailService.Services.EventProcessing;
 
-public class BroadcastEventProcessor : IEventProcessor
+public class EventProcessor : IEventProcessor
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public BroadcastEventProcessor(IServiceProvider serviceProvider)
+    public EventProcessor(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
