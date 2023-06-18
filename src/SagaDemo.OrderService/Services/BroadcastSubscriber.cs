@@ -1,24 +1,24 @@
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using SagaDemo.EmailService.Configurations;
-using SagaDemo.EmailService.EventProcessing;
+using SagaDemo.OrderService.Configurations;
+using SagaDemo.OrderService.EventProcessing;
 
-namespace SagaDemo.EmailService.Services;
+namespace SagaDemo.OrderService.Services;
 
-public class MessageBusSubscriber : BackgroundService
+public class BroadcastSubscriber : BackgroundService
 {
     private readonly IEventProcessor _eventProcessor;
     private readonly RabbitMqSettings _settings;
     private IConnection? _connection;
     private IModel? _channel;
     private string? _queueName;
-    private readonly ILogger<MessageBusSubscriber> _logger;
+    private readonly ILogger<BroadcastSubscriber> _logger;
 
-    public MessageBusSubscriber(
+    public BroadcastSubscriber(
         IEventProcessor eventProcessor,
         RabbitMqSettings rabbitMqSettings,
-        ILogger<MessageBusSubscriber> logger)
+        ILogger<BroadcastSubscriber> logger)
     {
         _eventProcessor = eventProcessor;
         _settings = rabbitMqSettings;
@@ -39,9 +39,9 @@ public class MessageBusSubscriber : BackgroundService
         _queueName = _channel?.QueueDeclare().QueueName;
 
         _channel?.QueueBind(_queueName, "broadcast", "");
-        if(_connection is not null)
+        if (_connection is not null)
             _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
-        
+
         _logger.LogInformation("Successfully connected to RabbitMQ");
     }
 
@@ -68,7 +68,7 @@ public class MessageBusSubscriber : BackgroundService
 
     public new void Dispose()
     {
-        if(_channel?.IsOpen ?? false)
+        if (_channel?.IsOpen ?? false)
         {
             _channel?.Close();
             _connection?.Close();

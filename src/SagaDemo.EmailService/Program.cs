@@ -14,9 +14,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
-builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
+builder.Services.AddSingleton<IEventProcessor, BroadcastEventProcessor>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddHostedService<MessageBusSubscriber>();
+builder.Services.AddHostedService<BroadcastSubscriber>();
 builder.Services.AddDbContext<EmailDbContext>(options => 
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));
