@@ -56,7 +56,6 @@ public class OrderServiceSubscriber : BackgroundService
 
     private void EventReceived(object? sender, BasicDeliverEventArgs e)
     {
-        _logger.LogCritical("Event received from the message broker");
         string message = Encoding.UTF8.GetString(e.Body.ToArray());
         _eventProcessor.Process(message);
     }

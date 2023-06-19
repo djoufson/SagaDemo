@@ -2,7 +2,6 @@
 using SagaDemo.OrderService.Data;
 using SagaDemo.OrderService.Dtos;
 using SagaDemo.OrderService.Entities;
-using SagaDemo.OrderService.Extensions;
 using SagaDemo.OrderService.Persistence.Products;
 
 namespace SagaDemo.OrderService.Persistence.Orders;
@@ -31,14 +30,14 @@ public class OrdersRepository : IOrdersRepository
     public async Task<IReadOnlyList<Order>> GetAllAsync()
     {
         return await _dbContext.Orders
-            .Include(o => o.Product)
+            // .Include(o => o.Product)
             .ToArrayAsync();
     }
 
     public async Task<Order?> GetByIdAsync(Guid id)
     {
         return await _dbContext.Orders
-            .Include(o => o.Product)
+            // .Include(o => o.Product)
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 
@@ -48,8 +47,24 @@ public class OrdersRepository : IOrdersRepository
         if(product is null)
             return null;
 
-        Order order = orderDto.CreateOrder(product);
-        await _dbContext.Orders.AddAsync(order);
+        Order order = new()
+        {
+            ProductId = orderDto.ProductId,
+            UserId = orderDto.UserId,
+            Product = product,
+            State = OrderState.Pending
+        };
+        await _dbContext.Orders.AddRangeAsync(order);
+        await _dbContext.SaveChangesAsync();
+        return order;
+    }
+
+    public async Task<Order?> UpdateOrderStateAsync(Guid orderId, OrderState state)
+    {
+        Order? order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+        if(order is null)
+            return null;
+        order.State = state;
         await _dbContext.SaveChangesAsync();
         return order;
     }

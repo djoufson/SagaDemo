@@ -3,6 +3,7 @@ namespace SagaDemo.PaymentService.Events;
 public class PaymentFailed : Event
 {
     public Guid Id { get; set; }
+    public Guid UserId { get; set; }
     public Guid OrderId { get; set; }
     public DateTime PurchaseDate { get; set; }
     public override string EventName => EventType;

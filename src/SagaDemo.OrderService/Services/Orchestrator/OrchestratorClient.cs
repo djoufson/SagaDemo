@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
-using SagaDemo.EmailService.Configurations;
-using SagaDemo.EmailService.Events;
+using SagaDemo.OrderService.Configurations;
+using SagaDemo.OrderService.Events;
 
-namespace SagaDemo.EmailService.Services.Orchestrator;
+namespace SagaDemo.OrderService.Services.Orchestrator;
 
 public class OrchestratorClient : IOrchestratorClient
 {
@@ -30,7 +30,7 @@ public class OrchestratorClient : IOrchestratorClient
             _connection = factory.CreateConnection();
             _channel = _connection?.CreateModel();
             _channel?.ExchangeDeclare("orchestrator", ExchangeType.Direct);
-            if(_connection is not null)
+            if (_connection is not null)
                 _connection.ConnectionShutdown += (_, __) => _logger.LogCritical("RabbitMQ connection shut down");
 
             _logger.LogInformation("Successfully connected to RabbitMQ direct exchange");
@@ -41,17 +41,15 @@ public class OrchestratorClient : IOrchestratorClient
         }
     }
 
-    public Task RaiseEmailSentEvent(EmailSent @event)
+    public Task RaiseOrderPlacedEvent(OrderPlaced @event)
     {
-        Console.WriteLine("--> Publishing the EmailSent event");
         string message = JsonSerializer.Serialize(@event);
         RaiseEvent(message);
         return Task.CompletedTask;
     }
 
-    public Task RaiseEmailFailedEvent(EmailFailed @event)
+    public Task RaiserOrderUnDoneAsync(OrderUnDone @event)
     {
-        Console.WriteLine("--> Publishing the EmailFailed event");
         string message = JsonSerializer.Serialize(@event);
         RaiseEvent(message);
         return Task.CompletedTask;
@@ -59,25 +57,23 @@ public class OrchestratorClient : IOrchestratorClient
 
     private void RaiseEvent(string message)
     {
-        if(_connection?.IsOpen ?? false)
-        {
-            _logger.LogInformation("The connection is open", message);
+        if (_connection?.IsOpen ?? false)
             SendMessage(message);
-        }
         else
             _logger.LogInformation("The connection is closed", message);
     }
+
 
     #region Setup methods
     private void SendMessage(string message)
     {
         byte[] body = Encoding.UTF8.GetBytes(message);
-        _channel.BasicPublish("orchestrator", "emailService", null, body);
+        _channel.BasicPublish("orchestrator", "orderService", null, body);
     }
 
     public void Dispose()
     {
-        if(_channel?.IsOpen ?? false)
+        if (_channel?.IsOpen ?? false)
         {
             _channel?.Close();
             _connection?.Close();

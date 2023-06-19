@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SagaDemo.AuthService.Data;
+using SagaDemo.PaymentService.Data;
 
 #nullable disable
 
-namespace SagaDemo.AuthService.Migrations
+namespace SagaDemo.PaymentService.Migrations
 {
-    [DbContext(typeof(AuthDbContext))]
-    [Migration("20230617131436_Initial Create")]
-    partial class InitialCreate
+    [DbContext(typeof(PaymentDbCOntext))]
+    [Migration("20230619171615_Update")]
+    partial class Update
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,27 +20,27 @@ namespace SagaDemo.AuthService.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
 
-            modelBuilder.Entity("SagaDemo.AuthService.Models.User", b =>
+            modelBuilder.Entity("SagaDemo.PaymentService.Entities.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
+                    b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<int>("State")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Transactions");
                 });
 #pragma warning restore 612, 618
         }

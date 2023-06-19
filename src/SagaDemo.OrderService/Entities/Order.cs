@@ -1,4 +1,6 @@
-﻿using SagaDemo.OrderService.Entities.Base;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using SagaDemo.OrderService.Entities.Base;
 
 namespace SagaDemo.OrderService.Entities;
 
@@ -16,6 +18,5 @@ public enum OrderState
 {
     Pending,
     Success,
-    Cancelled,
-    Fail,
+    Fail
 }

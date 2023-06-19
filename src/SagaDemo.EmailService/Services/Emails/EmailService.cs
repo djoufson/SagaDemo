@@ -1,11 +1,21 @@
-﻿using SagaDemo.EmailService.Entities;
+﻿using SagaDemo.EmailService.Data;
+using SagaDemo.EmailService.Entities;
 
 namespace SagaDemo.EmailService.Services.Emails;
 
 public class EmailService : IEmailService
 {
-    public Task<bool> SendAsync(Email email)
+    private readonly EmailDbContext _dbContext;
+
+    public EmailService(EmailDbContext dbContext)
     {
-        return Task.FromResult(true);
+        _dbContext = dbContext;
+    }
+
+    public async Task<bool> SendAsync(Email email)
+    {
+        await _dbContext.Emails.AddAsync(email);
+        await _dbContext.SaveChangesAsync();
+        return true;
     }
 }

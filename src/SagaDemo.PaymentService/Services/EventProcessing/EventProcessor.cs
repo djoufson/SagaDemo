@@ -28,39 +28,52 @@ public class EventProcessor : IEventProcessor
         switch (@event.EventName)
         {
             case MakePaymentCommand.EventType:
-            {
-                MakePaymentCommand? content = JsonSerializer.Deserialize<MakePaymentCommand>(message);
-                Console.WriteLine($"--> Parsing the event content: {content}");
-                if (content is null)
-                    return;
+                {
+                    MakePaymentCommand? content = JsonSerializer.Deserialize<MakePaymentCommand>(message);
+                    Console.WriteLine($"--> Make payment request");
+                    if (content is null)
+                        return;
 
-                Transaction transaction = new()
-                {
-                    OrderId = content.OrderId,
-                    PurchaseDate = DateTime.Now,
-                    State = TransactionState.Pending,
-                };
-                transaction = await paymentService.MakeTransactionAsync(transaction);
-                if(transaction.State == TransactionState.Success)
-                {
-                    await orchestratorClient.RaisePaymentSucceededEvent(new PaymentSucceeded()
+                    Transaction transaction = new()
                     {
-                        Id = transaction.Id,
-                        OrderId = transaction.OrderId,
-                        PurchaseDate = transaction.PurchaseDate
-                    });
+                        UserId = content.UserId,
+                        OrderId = content.OrderId,
+                        PurchaseDate = DateTime.Now,
+                        State = TransactionState.Success,
+                    };
+                    transaction = await paymentService.MakeTransactionAsync(transaction);
+                    if(transaction.State == TransactionState.Success)
+                    {
+                        await orchestratorClient.RaisePaymentSucceededEvent(new PaymentSucceeded()
+                        {
+                            Id = transaction.Id,
+                            UserId = transaction.UserId,
+                            OrderId = transaction.OrderId,
+                            PurchaseDate = transaction.PurchaseDate
+                        });
+                    }
+                    else
+                    {
+                        await orchestratorClient.RaisePaymentFailedEvent(new PaymentFailed()
+                        {
+                            Id = transaction.Id,
+                            UserId = transaction.UserId,
+                            OrderId = transaction.OrderId,
+                            PurchaseDate = transaction.PurchaseDate
+                        });
+                    }
+                    break;
                 }
-                else
+            case UndoMakePaymentCommand.EventType:
                 {
-                    await orchestratorClient.RaisePaymentFailedEvent(new PaymentFailed()
-                    {
-                        Id = transaction.Id,
-                        OrderId = transaction.OrderId,
-                        PurchaseDate = transaction.PurchaseDate
-                    });
+                    UndoMakePaymentCommand? content = JsonSerializer.Deserialize<UndoMakePaymentCommand>(message);
+                    Console.WriteLine($"--> Undo payment request");
+                    if (content is null)
+                        return;
+
+                    await paymentService.UndoTransaction(content.TransactionId);
                 }
                 break;
-            }
             default:
                 break;
         }

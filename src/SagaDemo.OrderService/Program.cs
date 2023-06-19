@@ -4,8 +4,9 @@ using SagaDemo.OrderService.Data;
 using SagaDemo.OrderService.Persistence.Orders;
 using SagaDemo.OrderService.Persistence.Products;
 using SagaDemo.OrderService.Persistence.Users;
-using SagaDemo.OrderService.Services;
 using SagaDemo.OrderService.Services.EventProcessing;
+using SagaDemo.OrderService.Services.Jobs;
+using SagaDemo.OrderService.Services.Orchestrator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,7 @@ builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSett
 builder.Services.AddScoped<IProductsRepository, ProductRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+builder.Services.AddSingleton<IOrchestratorClient, OrchestratorClient>();
 
 var app = builder.Build();
 app.SeedData();

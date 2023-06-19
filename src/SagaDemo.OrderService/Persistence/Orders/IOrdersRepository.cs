@@ -8,4 +8,5 @@ public interface IOrdersRepository : IRepository<Order, Guid>
 {
     Task<Order?> MakeOrderAsync(PostOrderDto order);
     Task<bool> DeleteOrderAsync(Guid orderId);
+    Task<Order?> UpdateOrderStateAsync(Guid orderId, OrderState state);
 }

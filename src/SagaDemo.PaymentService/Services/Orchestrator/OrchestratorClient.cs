@@ -58,10 +58,7 @@ public class OrchestratorClient : IOrchestratorClient
     private void RaiseEvent(string message)
     {
         if (_connection?.IsOpen ?? false)
-        {
-            _logger.LogInformation("The connection is open", message);
             SendMessage(message);
-        }
         else
             _logger.LogInformation("The connection is closed", message);
     }

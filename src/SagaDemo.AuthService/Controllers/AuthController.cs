@@ -51,7 +51,12 @@ public class AuthController : ControllerBase
 
         try
         {
-            await _broadcastClient.PublishUserRegisteredAsync(new UserRegistered(user.Id, user.Name, user.Email, UserRegistered.EventType));
+            await _broadcastClient.PublishUserRegisteredAsync(new UserRegistered()
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email
+            });
         }
         catch(Exception ex)
         {

@@ -4,7 +4,7 @@ using RabbitMQ.Client.Events;
 using SagaDemo.OrderService.Configurations;
 using SagaDemo.OrderService.Services.EventProcessing;
 
-namespace SagaDemo.OrderService.Services;
+namespace SagaDemo.OrderService.Services.Jobs;
 
 public class BroadcastSubscriber : BackgroundService
 {
@@ -53,7 +53,6 @@ public class BroadcastSubscriber : BackgroundService
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var consumer = new EventingBasicConsumer(_channel);
-
         consumer.Received += EventReceived;
         _channel.BasicConsume(_queueName, true, consumer);
         return Task.CompletedTask;
@@ -61,7 +60,6 @@ public class BroadcastSubscriber : BackgroundService
 
     private void EventReceived(object? sender, BasicDeliverEventArgs e)
     {
-        _logger.LogCritical("Event received from the message broker");
         string message = Encoding.UTF8.GetString(e.Body.ToArray());
         _eventProcessor.Process(message);
     }

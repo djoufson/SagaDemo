@@ -11,7 +11,7 @@ using SagaDemo.OrderService.Data;
 namespace SagaDemo.OrderService.Migrations
 {
     [DbContext(typeof(OrdersDbContext))]
-    [Migration("20230617100514_Initial Create")]
+    [Migration("20230619125141_Initial Create")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -42,6 +42,8 @@ namespace SagaDemo.OrderService.Migrations
 
                     b.HasIndex("ProductId");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Orders");
                 });
 
@@ -66,6 +68,30 @@ namespace SagaDemo.OrderService.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("SagaDemo.OrderService.Entities.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ExternalId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExternalId");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("SagaDemo.OrderService.Entities.Order", b =>
                 {
                     b.HasOne("SagaDemo.OrderService.Entities.Product", "Product")
@@ -74,7 +100,18 @@ namespace SagaDemo.OrderService.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SagaDemo.OrderService.Entities.User", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("SagaDemo.OrderService.Entities.User", b =>
+                {
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

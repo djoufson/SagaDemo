@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.EmailService.Configurations;
 using SagaDemo.EmailService.Data;
+using SagaDemo.EmailService.Services.Emails;
 using SagaDemo.EmailService.Services.EventProcessing;
 using SagaDemo.EmailService.Services.Jobs;
 using SagaDemo.EmailService.Services.Orchestrator;
@@ -18,6 +19,7 @@ builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSett
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 builder.Services.AddSingleton<IOrchestratorClient, OrchestratorClient>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHostedService<BroadcastSubscriber>();
 builder.Services.AddHostedService<OrchestratorSubscriber>();
 builder.Services.AddDbContext<EmailDbContext>(options => 

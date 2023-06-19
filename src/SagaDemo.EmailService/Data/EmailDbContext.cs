@@ -10,4 +10,5 @@ public class EmailDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Email> Emails { get; set; } = null!;
 }

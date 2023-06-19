@@ -2,42 +2,40 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SagaDemo.PaymentService.Data;
+using SagaDemo.EmailService.Data;
 
 #nullable disable
 
-namespace SagaDemo.PaymentService.Migrations
+namespace SagaDemo.EmailService.Migrations
 {
-    [DbContext(typeof(PaymentDbCOntext))]
-    partial class PaymentDbCOntextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(EmailDbContext))]
+    [Migration("20230619125412_Initial Create")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
 
-            modelBuilder.Entity("SagaDemo.PaymentService.Entities.Transaction", b =>
+            modelBuilder.Entity("SagaDemo.EmailService.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("OrderId")
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("State")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("ExternalId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

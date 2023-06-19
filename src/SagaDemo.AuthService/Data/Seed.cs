@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using SagaDemo.AuthService.Contracts;
 using SagaDemo.AuthService.Models;
+using SagaDemo.AuthService.Services.RabbitMq;
 
 namespace SagaDemo.AuthService.Data;
 
@@ -9,19 +11,25 @@ internal static class Seed
     {
         using IServiceScope scope = app.Services.CreateScope();
         using AuthDbContext dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+        IBroadcastClient client = scope.ServiceProvider.GetRequiredService<IBroadcastClient>();
         var any = await dbContext.Users.AnyAsync();
         if (any)
             return;
 
         Console.WriteLine("--> Seeding Data");
-        await dbContext.Users.AddAsync(
-            new User 
-            {
-                Email = "djoufson@email.com",
-                Name = "Djoufson",
-                Password = "DjoufsonPassword 1"
-            });
-
+        User user = new()
+        {
+            Email = "djoufson@email.com",
+            Name = "Djoufson",
+            Password = "DjoufsonPassword 1"
+        };
+        await dbContext.Users.AddAsync(user);
+        await client.PublishUserRegisteredAsync(new UserRegistered()
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Email = user.Email
+        });
         await dbContext.SaveChangesAsync();
     }
 }

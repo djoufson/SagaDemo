@@ -1,10 +1,10 @@
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using SagaDemo.PaymentService.Configurations;
-using SagaDemo.PaymentService.Services.EventProcessing;
+using SagaDemo.OrderService.Configurations;
+using SagaDemo.OrderService.Services.EventProcessing;
 
-namespace SagaDemo.PaymentService.Services.Jobs;
+namespace SagaDemo.OrderService.Services.Jobs;
 
 public class OrchestratorSubscriber : BackgroundService
 {
@@ -26,7 +26,7 @@ public class OrchestratorSubscriber : BackgroundService
         InitializeRabbitMq();
     }
 
-    private void InitializeRabbitMq()
+    public void InitializeRabbitMq()
     {
         var factory = new ConnectionFactory()
         {
@@ -35,20 +35,24 @@ public class OrchestratorSubscriber : BackgroundService
         };
         _connection = factory.CreateConnection();
         _channel = _connection?.CreateModel();
-        _channel?.ExchangeDeclare("orchestrator", ExchangeType.Direct);
+        _channel?.ExchangeDeclare("orchestrator", ExchangeType.Fanout);
         _queueName = _channel?.QueueDeclare().QueueName;
 
-        _channel?.QueueBind(_queueName, "orchestrator", "paymentService");
+        _channel?.QueueBind(_queueName, "orchestrator", "orderService");
         if (_connection is not null)
-            _connection.ConnectionShutdown += (_, __) => _logger.LogWarning("RabbitMQ connection shut down");
+            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
 
         _logger.LogInformation("Successfully connected to RabbitMQ");
+    }
+
+    private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
+    {
+        _logger.LogWarning("RabbitMQ connection shut down");
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var consumer = new EventingBasicConsumer(_channel);
-
         consumer.Received += EventReceived;
         _channel.BasicConsume(_queueName, true, consumer);
         return Task.CompletedTask;
@@ -59,4 +63,14 @@ public class OrchestratorSubscriber : BackgroundService
         string message = Encoding.UTF8.GetString(e.Body.ToArray());
         _eventProcessor.Process(message);
     }
+
+    public new void Dispose()
+    {
+        if (_channel?.IsOpen ?? false)
+        {
+            _channel?.Close();
+            _connection?.Close();
+        }
+    }
 }
+

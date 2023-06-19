@@ -20,9 +20,21 @@ public class PaymentService : IPaymentService
 
     public async Task<Transaction> MakeTransactionAsync(Transaction transaction)
     {
-        // await Task.Delay(5000);
+        bool success = Random.Shared.Next(1, 3) == 1;
+        if(success)
+            transaction.State = TransactionState.Success;
+        else
+            transaction.State = TransactionState.Fail;
+        await Task.Delay(5000);
         await _dbContext.Transactions.AddAsync(transaction);
         await _dbContext.SaveChangesAsync();
         return transaction;
+    }
+
+    public async Task<bool> UndoTransaction(Guid transactionId)
+    {
+        return await _dbContext.Transactions
+            .Where(t => t.Id == transactionId)
+            .ExecuteDeleteAsync() > 0;
     }
 }
