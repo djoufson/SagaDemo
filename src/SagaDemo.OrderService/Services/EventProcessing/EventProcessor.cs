@@ -5,11 +5,11 @@ using SagaDemo.OrderService.Persistence.Users;
 
 namespace SagaDemo.OrderService.Services.EventProcessing;
 
-public class BroadcastEventProcessor : IEventProcessor
+public class EventProcessor : IEventProcessor
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public BroadcastEventProcessor(IServiceProvider serviceProvider)
+    public EventProcessor(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
