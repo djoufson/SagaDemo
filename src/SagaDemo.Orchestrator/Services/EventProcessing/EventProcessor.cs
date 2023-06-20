@@ -30,17 +30,17 @@ public class EventProcessor : IEventProcessor
         switch (@event.EventName)
         {
             case EmailSent.EventType:
-                Console.WriteLine("--> Email Sent");
+                _logger.LogCritical("Email Sent");
                 break;
             case EmailFailed.EventType:
-                Console.WriteLine("--> Email Failed");
+                _logger.LogCritical("Email Failed");
                 break;
             case OrderPlaced.EventType:
                 {
-                    _logger.LogCritical("--> Order Placed (Pending)");
                     OrderPlaced? orderPlaced = JsonSerializer.Deserialize<OrderPlaced>(message);
                     if(orderPlaced is null)
                         return;
+                    _logger.LogCritical("--> Order Placed (Pending) : {OrderId}", orderPlaced.OrderId);
                     command = new MakePaymentCommand()
                     {
                         OrderId = orderPlaced.OrderId
@@ -48,12 +48,28 @@ public class EventProcessor : IEventProcessor
                     await orchestrator.RequestMakePaymentAsync(command);
                 }
                 break;
+            case OrderUnDone.EventType:
+                {
+                    OrderUnDone? orderCanceled = JsonSerializer.Deserialize<OrderUnDone>(message);
+                    if(orderCanceled is null)
+                        return;
+                    _logger.LogCritical("--> Order Placed (Canceled) : {OrderId}", orderCanceled.OrderId);
+                }
+                break;
+            case OrderSuccess.EventType:
+                {
+                    OrderSuccess? orderPlaced = JsonSerializer.Deserialize<OrderSuccess>(message);
+                    if(orderPlaced is null)
+                        return;
+                    _logger.LogCritical("--> Order Placed (Success) : {OrderId}", orderPlaced.OrderId);
+                }
+                break;
             case PaymentFailed.EventType:
                 {
-                    _logger.LogCritical("--> Payment Failed");
                     PaymentFailed? payment = JsonSerializer.Deserialize<PaymentFailed>(message);
                     if(payment is null)
                         return;
+                    _logger.LogCritical("--> Payment Failed : {PaymentId}", payment.Id);
                     command = new UndoOrderCommand()
                     {
                         OrderId = payment.OrderId
@@ -63,10 +79,10 @@ public class EventProcessor : IEventProcessor
                 break;
             case PaymentSucceeded.EventType:
                 {
-                    _logger.LogCritical("--> Payment Succeeded");
                     PaymentSucceeded? payment = JsonSerializer.Deserialize<PaymentSucceeded>(message);
                     if(payment is null)
                         return;
+                    _logger.LogCritical("--> Payment Succeeded : {PaymentId}", payment.Id);
                     command = new SendEmailCommand()
                     {
                         UserId = payment.UserId,

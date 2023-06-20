@@ -21,6 +21,7 @@ builder.Services.AddDbContext<OrdersDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));
 });
 builder.Services.AddHostedService<BroadcastSubscriber>();
+builder.Services.AddHostedService<OrchestratorSubscriber>();
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
 builder.Services.AddScoped<IProductsRepository, ProductRepository>();

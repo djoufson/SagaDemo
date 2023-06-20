@@ -55,6 +55,13 @@ public class OrchestratorClient : IOrchestratorClient
         return Task.CompletedTask;
     }
 
+    public Task RaiseOrderSuccessAsync(OrderSuccess @event)
+    {
+        string message = JsonSerializer.Serialize(@event);
+        RaiseEvent(message);
+        return Task.CompletedTask;
+    }
+
     private void RaiseEvent(string message)
     {
         if (_connection?.IsOpen ?? false)

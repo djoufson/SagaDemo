@@ -35,7 +35,7 @@ public class OrchestratorSubscriber : BackgroundService
         };
         _connection = factory.CreateConnection();
         _channel = _connection?.CreateModel();
-        _channel?.ExchangeDeclare("orchestrator", ExchangeType.Fanout);
+        _channel?.ExchangeDeclare("orchestrator", ExchangeType.Direct);
         _queueName = _channel?.QueueDeclare().QueueName;
 
         _channel?.QueueBind(_queueName, "orchestrator", "orderService");

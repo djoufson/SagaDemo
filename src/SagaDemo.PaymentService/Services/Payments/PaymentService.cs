@@ -20,12 +20,12 @@ public class PaymentService : IPaymentService
 
     public async Task<Transaction> MakeTransactionAsync(Transaction transaction)
     {
-        bool success = Random.Shared.Next(1, 3) == 1;
+        bool success = Random.Shared.Next(1, 20) <= 8;
         if(success)
             transaction.State = TransactionState.Success;
         else
             transaction.State = TransactionState.Fail;
-        await Task.Delay(5000);
+        await Task.Delay(2000);
         await _dbContext.Transactions.AddAsync(transaction);
         await _dbContext.SaveChangesAsync();
         return transaction;

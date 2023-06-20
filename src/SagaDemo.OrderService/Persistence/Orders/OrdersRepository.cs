@@ -27,17 +27,36 @@ public class OrdersRepository : IOrdersRepository
         return records > 0;
     }
 
+    public async Task<bool> UndoOrderCommandAsync(Guid orderId)
+    {
+        Order? order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+        if(order is null)
+            return false;
+
+        Product? product = await _productsRepository.GetByIdAsync(order.ProductId);
+        if(product is null)
+            return false;
+
+        product.QuantityInStock += order.Quantity;
+
+        int records = await _dbContext.Orders
+            .Where(o => o.Id == orderId)
+            .ExecuteDeleteAsync();
+        await _dbContext.SaveChangesAsync();
+        return records > 0;
+    }
+
     public async Task<IReadOnlyList<Order>> GetAllAsync()
     {
         return await _dbContext.Orders
-            // .Include(o => o.Product)
+            .Include(o => o.Product)
             .ToArrayAsync();
     }
 
     public async Task<Order?> GetByIdAsync(Guid id)
     {
         return await _dbContext.Orders
-            // .Include(o => o.Product)
+            .Include(o => o.Product)
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 
@@ -47,8 +66,13 @@ public class OrdersRepository : IOrdersRepository
         if(product is null)
             return null;
 
+        if(product.QuantityInStock - orderDto.Quantity < 0)
+            return null;
+
+        product.QuantityInStock -= orderDto.Quantity;
         Order order = new()
         {
+            Quantity = orderDto.Quantity,
             ProductId = orderDto.ProductId,
             UserId = orderDto.UserId,
             Product = product,

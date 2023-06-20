@@ -11,10 +11,14 @@ namespace SagaDemo.EmailService.Services.EventProcessing;
 public class EventProcessor : IEventProcessor
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<EventProcessor> _logger;
 
-    public EventProcessor(IServiceProvider serviceProvider)
+    public EventProcessor(
+        IServiceProvider serviceProvider,
+        ILogger<EventProcessor> logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     public async void Process(string message)
@@ -32,10 +36,10 @@ public class EventProcessor : IEventProcessor
             case UserRegistered.EventType:
                 {
                     UserRegistered? content = JsonSerializer.Deserialize<UserRegistered>(message);
-                    Console.WriteLine($"--> User created");
                     if (content is null)
                         return;
 
+                    _logger.LogCritical("--> User created : {UserId}", content.Id);
                     User user = new()
                     {
                         ExternalId = content.Id,
@@ -47,9 +51,10 @@ public class EventProcessor : IEventProcessor
             case SendEmailCommand.EventType:
                 {
                     SendEmailCommand? content = JsonSerializer.Deserialize<SendEmailCommand>(message);
-                    Console.WriteLine($"--> Send email request");
                     if (content is null)
                         return;
+
+                    _logger.LogCritical("--> Send email request : {UserId}", content.UserId);
                     User? user = await userService.GetByIdAsync(content.UserId);
                     if(user is null)
                         return;
@@ -61,6 +66,8 @@ public class EventProcessor : IEventProcessor
                         Message = content.Message,
                         State = EmailState.Pending
                     };
+
+                    // TODO: Design here to retry 3 times
                     bool success = await emailService.SendAsync(email);
                     if(success)
                     {

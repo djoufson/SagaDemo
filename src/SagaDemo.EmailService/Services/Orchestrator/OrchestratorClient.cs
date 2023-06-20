@@ -43,7 +43,6 @@ public class OrchestratorClient : IOrchestratorClient
 
     public Task RaiseEmailSentEvent(EmailSent @event)
     {
-        Console.WriteLine("--> Publishing the EmailSent event");
         string message = JsonSerializer.Serialize(@event);
         RaiseEvent(message);
         return Task.CompletedTask;
@@ -51,7 +50,6 @@ public class OrchestratorClient : IOrchestratorClient
 
     public Task RaiseEmailFailedEvent(EmailFailed @event)
     {
-        Console.WriteLine("--> Publishing the EmailFailed event");
         string message = JsonSerializer.Serialize(@event);
         RaiseEvent(message);
         return Task.CompletedTask;

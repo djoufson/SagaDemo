@@ -11,10 +11,14 @@ namespace SagaDemo.OrderService.Services.EventProcessing;
 public class EventProcessor : IEventProcessor
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<EventProcessor> _logger;
 
-    public EventProcessor(IServiceProvider serviceProvider)
+    public EventProcessor(
+        IServiceProvider serviceProvider,
+        ILogger<EventProcessor> logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     public async void Process(string message)
@@ -31,11 +35,11 @@ public class EventProcessor : IEventProcessor
         {
             case UserRegistered.EventType:
                 {
-                    Console.WriteLine("--> User create request");
                     UserRegistered? content = JsonSerializer.Deserialize<UserRegistered>(message);
                     if (content is null)
                         return;
 
+                    _logger.LogCritical("--> Create user request: {UserId}", content.Id);
                     User user = new()
                     {
                         Name = content.Name,
@@ -48,11 +52,24 @@ public class EventProcessor : IEventProcessor
                 break;
             case ChangeOrderStateCommand.EventType:
                 {
-                    Console.WriteLine("--> Order update request");
                     ChangeOrderStateCommand? command = JsonSerializer.Deserialize<ChangeOrderStateCommand>(message);
                     if(command is null)
                         return;
+                    _logger.LogCritical("--> Update order request : {OrderId}", command.OrderId);
                     _ = await orderRepository.UpdateOrderStateAsync(command.OrderId, command.State);
+                    await orchestrator.RaiseOrderSuccessAsync(new OrderSuccess()
+                    {
+                        OrderId = command.OrderId
+                    });
+                }
+                break;
+            case UndoOrderCommand.EventType:
+                {
+                    UndoOrderCommand? command = JsonSerializer.Deserialize<UndoOrderCommand>(message);
+                    if(command is null)
+                        return;
+                    _logger.LogCritical("--> Undo order request : {OrderId}", command.OrderId);
+                    _ = await orderRepository.UndoOrderCommandAsync(command.OrderId);
                     await orchestrator.RaiserOrderUnDoneAsync(new OrderUnDone()
                     {
                         OrderId = command.OrderId
