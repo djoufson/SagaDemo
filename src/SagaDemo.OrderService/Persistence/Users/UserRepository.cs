@@ -25,6 +25,11 @@ public class UserRepository : IUserRepository
         return await _dbContext.Users.ToArrayAsync();
     }
 
+    public Task<User?> GetByEmailAsync(string email)
+    {
+        return _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
     public Task<User?> GetByIdAsync(Guid id)
     {
         return _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);

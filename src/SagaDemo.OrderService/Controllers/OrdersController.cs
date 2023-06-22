@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SagaDemo.OrderService.Attributes;
 using SagaDemo.OrderService.Dtos;
 using SagaDemo.OrderService.Entities;
 using SagaDemo.OrderService.Events;
@@ -9,6 +11,7 @@ using SagaDemo.OrderService.Services.Orchestrator;
 namespace SagaDemo.OrderService.Controllers;
 
 [ApiController]
+[JwtAuthorize]
 [Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
@@ -33,11 +36,16 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> MakeAnOrder(PostOrderDto orderDto)
+    [Authorize]
+    public async Task<IActionResult> MakeAnOrder(PostOrderRequestDto orderDto)
     {
-        User? user = await _userRepository.GetByIdAsync(orderDto.UserId);
-        Order? order = await _ordersRepository.MakeOrderAsync(orderDto);
-        if(order is null || user is null)
+        string email = HttpContext.Request.Headers[HeaderKeys.EmailHeaderKey]!;
+        User? user = await _userRepository.GetByEmailAsync(email);
+        if(user is null)
+            return Unauthorized();
+
+        Order? order = await _ordersRepository.MakeOrderAsync(new PostOrderDto(orderDto.ProductId, user.Id, orderDto.Quantity));
+        if(order is null)
             return BadRequest("Unable to make the order");
 
         await _orchestrator.RaiseOrderPlacedEvent(new OrderPlaced()

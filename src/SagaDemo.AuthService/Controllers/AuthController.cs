@@ -7,6 +7,8 @@ using SagaDemo.AuthService.Services.Users;
 
 namespace SagaDemo.AuthService.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;

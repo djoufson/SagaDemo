@@ -23,6 +23,12 @@ internal class UserService : IUserService
         return _dbContext.Users.AnyAsync(x => x.Email == email);
     }
 
+    public async Task<IReadOnlyList<User>> GetAllAsync()
+    {
+        var users = await _dbContext.Users.ToArrayAsync();
+        return users.ToArray();
+    }
+
     public async Task<string?> LoginUserAsync(string email, string password)
     {
         User? user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);

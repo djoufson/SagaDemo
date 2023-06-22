@@ -6,4 +6,5 @@ namespace SagaDemo.OrderService.Persistence.Users;
 public interface IUserRepository : IRepository<User, Guid>
 {
     Task<User?> AddUserAsync(User user);
+    Task<User?> GetByEmailAsync(string email);
 }
