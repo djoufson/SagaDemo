@@ -16,10 +16,20 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<OrdersDbContext>(options =>
+if(builder.Environment.IsDevelopment())
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));
-});
+    builder.Services.AddDbContext<OrdersDbContext>(options =>
+    {
+        options.UseInMemoryDatabase("OrderDatabase");
+    });
+}
+else
+{
+    builder.Services.AddDbContext<OrdersDbContext>( options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+    });
+}
 builder.Services.AddHostedService<BroadcastSubscriber>();
 builder.Services.AddHostedService<OrchestratorSubscriber>();
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();

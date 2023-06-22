@@ -23,6 +23,11 @@ public class UserService : IUserService
         return user;
     }
 
+    public Task<User?> GetByExternalIdAsync(Guid userId)
+    {
+        return _dbContext.Users.FirstOrDefaultAsync(u => u.ExternalId == userId);
+    }
+
     public Task<User?> GetByIdAsync(Guid id)
     {
         return _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);

@@ -48,7 +48,6 @@ public class OrchestratorSubscriber : BackgroundService
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var consumer = new EventingBasicConsumer(_channel);
-
         consumer.Received += EventReceived;
         _channel.BasicConsume(_queueName, true, consumer);
         return Task.CompletedTask;
@@ -56,7 +55,6 @@ public class OrchestratorSubscriber : BackgroundService
 
     private void EventReceived(object? sender, BasicDeliverEventArgs e)
     {
-        _logger.LogCritical("Event received from the message broker");
         string message = Encoding.UTF8.GetString(e.Body.ToArray());
         _eventProcessor.Process(message);
     }

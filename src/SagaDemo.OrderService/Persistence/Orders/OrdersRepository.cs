@@ -39,9 +39,17 @@ public class OrdersRepository : IOrdersRepository
 
         product.QuantityInStock += order.Quantity;
 
-        int records = await _dbContext.Orders
-            .Where(o => o.Id == orderId)
-            .ExecuteDeleteAsync();
+        int records = 0;
+        try
+        {
+            records = await _dbContext.Orders
+                .Where(o => o.Id == orderId)
+                .ExecuteDeleteAsync();
+        }
+        catch (InvalidOperationException)
+        {
+            _dbContext.Orders.Remove(order);
+        }
         await _dbContext.SaveChangesAsync();
         return records > 0;
     }

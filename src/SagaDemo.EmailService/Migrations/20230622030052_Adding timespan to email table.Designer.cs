@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SagaDemo.EmailService.Data;
 
@@ -10,9 +11,11 @@ using SagaDemo.EmailService.Data;
 namespace SagaDemo.EmailService.Migrations
 {
     [DbContext(typeof(EmailDbContext))]
-    partial class EmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230622030052_Adding timespan to email table")]
+    partial class Addingtimespantoemailtable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");

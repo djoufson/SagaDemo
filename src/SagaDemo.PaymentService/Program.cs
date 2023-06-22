@@ -14,10 +14,21 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<PaymentDbCOntext>(options =>
+
+if(builder.Environment.IsDevelopment())
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));
-});
+    builder.Services.AddDbContext<PaymentDbCOntext>(options =>
+    {
+        options.UseInMemoryDatabase("PaymentsDatabase");
+    });
+}
+else
+{
+    builder.Services.AddDbContext<PaymentDbCOntext>(options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+    });
+}
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();

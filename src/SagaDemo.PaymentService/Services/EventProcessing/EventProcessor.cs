@@ -10,10 +10,14 @@ namespace SagaDemo.PaymentService.Services.EventProcessing;
 public class EventProcessor : IEventProcessor
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<EventProcessor> _logger;
 
-    public EventProcessor(IServiceProvider serviceProvider)
+    public EventProcessor(
+        IServiceProvider serviceProvider,
+        ILogger<EventProcessor> logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     public async void Process(string message)
@@ -30,10 +34,10 @@ public class EventProcessor : IEventProcessor
             case MakePaymentCommand.EventType:
                 {
                     MakePaymentCommand? content = JsonSerializer.Deserialize<MakePaymentCommand>(message);
-                    Console.WriteLine($"--> Make payment request");
                     if (content is null)
                         return;
 
+                    _logger.LogCritical("--> Make payment request : {OrderId}", content.OrderId);
                     Transaction transaction = new()
                     {
                         UserId = content.UserId,
@@ -67,10 +71,10 @@ public class EventProcessor : IEventProcessor
             case UndoMakePaymentCommand.EventType:
                 {
                     UndoMakePaymentCommand? content = JsonSerializer.Deserialize<UndoMakePaymentCommand>(message);
-                    Console.WriteLine($"--> Undo payment request");
                     if (content is null)
                         return;
 
+                    _logger.LogCritical("--> Undo payment request : {TransactionId}", content.TransactionId);
                     await paymentService.UndoTransaction(content.TransactionId);
                 }
                 break;

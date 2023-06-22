@@ -30,10 +30,10 @@ public class EventProcessor : IEventProcessor
         switch (@event.EventName)
         {
             case EmailSent.EventType:
-                _logger.LogCritical("Email Sent");
+                _logger.LogCritical("--> Email successfully sent");
                 break;
             case EmailFailed.EventType:
-                _logger.LogCritical("Email Failed");
+                _logger.LogCritical("--> Email failed");
                 break;
             case OrderPlaced.EventType:
                 {
@@ -43,6 +43,7 @@ public class EventProcessor : IEventProcessor
                     _logger.LogCritical("--> Order Placed (Pending) : {OrderId}", orderPlaced.OrderId);
                     command = new MakePaymentCommand()
                     {
+                        UserId = orderPlaced.UserId,
                         OrderId = orderPlaced.OrderId
                     };
                     await orchestrator.RequestMakePaymentAsync(command);
@@ -75,6 +76,17 @@ public class EventProcessor : IEventProcessor
                         OrderId = payment.OrderId
                     };
                     await orchestrator.RequestUndoOrderAsync(command);
+                    command = new SendEmailCommand()
+                    {
+                        UserId = payment.UserId,
+                        Object = "SagaDemo Notification",
+                        Message = 
+$@"PaymentID: {payment.Id}
+OrderID: {payment.OrderId}
+Payment Date: {payment.PurchaseDate.ToUniversalTime()} GMT
+Status: Failed ✅"
+                    };
+                    await orchestrator.RequestSendEmailAsync(command);
                 }
                 break;
             case PaymentSucceeded.EventType:
@@ -87,11 +99,11 @@ public class EventProcessor : IEventProcessor
                     {
                         UserId = payment.UserId,
                         Object = "SagaDemo Notification",
-                        Message = $@"
-                        PaymentID: {payment.Id}
-                        OrderID: {payment.OrderId}
-                        PaymentDate: {payment.PurchaseDate}
-                        Status: Success"
+                        Message = 
+$@"PaymentID: {payment.Id}
+OrderID: {payment.OrderId}
+PaymentDate: {payment.PurchaseDate.ToUniversalTime()} GMT
+Status: Success ✅"
                     };
                     await orchestrator.RequestSendEmailAsync(command);
                     command = new ChangeOrderStateCommand()

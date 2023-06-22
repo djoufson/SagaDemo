@@ -3,6 +3,7 @@ using SagaDemo.OrderService.Dtos;
 using SagaDemo.OrderService.Entities;
 using SagaDemo.OrderService.Events;
 using SagaDemo.OrderService.Persistence.Orders;
+using SagaDemo.OrderService.Persistence.Users;
 using SagaDemo.OrderService.Services.Orchestrator;
 
 namespace SagaDemo.OrderService.Controllers;
@@ -12,14 +13,17 @@ namespace SagaDemo.OrderService.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IOrdersRepository _ordersRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IOrchestratorClient _orchestrator;
 
     public OrdersController(
         IOrdersRepository ordersRepository,
-        IOrchestratorClient orchestrator)
+        IOrchestratorClient orchestrator,
+        IUserRepository userRepository)
     {
         _ordersRepository = ordersRepository;
         _orchestrator = orchestrator;
+        _userRepository = userRepository;
     }
 
     [HttpGet]
@@ -31,15 +35,16 @@ public class OrdersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> MakeAnOrder(PostOrderDto orderDto)
     {
+        User? user = await _userRepository.GetByIdAsync(orderDto.UserId);
         Order? order = await _ordersRepository.MakeOrderAsync(orderDto);
-        if(order is null)
+        if(order is null || user is null)
             return BadRequest("Unable to make the order");
 
         await _orchestrator.RaiseOrderPlacedEvent(new OrderPlaced()
         {
             OrderId = order.Id,
             ProductId = order.ProductId,
-            UserId = order.UserId,
+            UserId = user.ExternalId,
             Quantity = order.Quantity
         });
         return Ok(order);

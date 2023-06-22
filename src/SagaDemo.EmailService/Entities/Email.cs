@@ -7,6 +7,7 @@ public class Email
     public string Object { get; set; } = null!;
     public string Message { get; set; } = null!;
     public EmailState State { get; set; }
+    public DateTime SentAt { get; internal set; }
 }
 
 public enum EmailState

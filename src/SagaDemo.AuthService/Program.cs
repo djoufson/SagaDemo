@@ -13,10 +13,20 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<AuthDbContext>(options => 
+if(builder.Environment.IsDevelopment())
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));
-});
+    builder.Services.AddDbContext<AuthDbContext>(options => 
+    {
+        options.UseInMemoryDatabase("AuthDatabase");
+    });
+}
+else
+{
+    builder.Services.AddDbContext<AuthDbContext>(options => 
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+    });
+}
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>());
@@ -24,11 +34,11 @@ builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSett
 builder.Services.AddSingleton<IBroadcastClient, BroadcastClient>();
 
 var app = builder.Build();
-app.SeedData();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.SeedData();
     app.UseSwagger();
     app.UseSwaggerUI();
 }

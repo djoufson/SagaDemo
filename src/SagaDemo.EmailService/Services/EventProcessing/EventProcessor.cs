@@ -54,8 +54,8 @@ public class EventProcessor : IEventProcessor
                     if (content is null)
                         return;
 
-                    _logger.LogCritical("--> Send email request : {UserId}", content.UserId);
-                    User? user = await userService.GetByIdAsync(content.UserId);
+                    _logger.LogCritical("--> Request to send email to user : {UserId}", content.UserId);
+                    User? user = await userService.GetByExternalIdAsync(content.UserId);
                     if(user is null)
                         return;
 

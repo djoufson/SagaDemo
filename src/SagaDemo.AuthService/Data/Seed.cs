@@ -19,9 +19,9 @@ internal static class Seed
         Console.WriteLine("--> Seeding Data");
         User user = new()
         {
-            Email = "djoufson@email.com",
-            Name = "Djoufson",
-            Password = "DjoufsonPassword 1"
+            Email = "temgouarosane@gmail.com",
+            Name = "Rosane",
+            Password = "RosanePassword 1"
         };
         await dbContext.Users.AddAsync(user);
         await client.PublishUserRegisteredAsync(new UserRegistered()

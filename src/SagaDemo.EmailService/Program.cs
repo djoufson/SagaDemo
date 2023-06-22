@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mail;
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.EmailService.Configurations;
 using SagaDemo.EmailService.Data;
@@ -16,16 +18,37 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
+builder.Services.AddSingleton(_ => builder.Configuration.GetSection(EmailSettings.SectionName).Get<EmailSettings>());
+builder.Services.AddSingleton(_ => 
+{
+    var smtpSettings = builder.Configuration.GetSection(SmtpSettings.SectionName).Get<SmtpSettings>();
+    var smtpClient = new SmtpClient(smtpSettings.SmtpHost, smtpSettings.Port)
+    {
+        EnableSsl = true,
+        Credentials = new NetworkCredential(smtpSettings.UserName, smtpSettings.Password)
+    };
+    return smtpClient;
+});
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 builder.Services.AddSingleton<IOrchestratorClient, OrchestratorClient>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHostedService<BroadcastSubscriber>();
 builder.Services.AddHostedService<OrchestratorSubscriber>();
-builder.Services.AddDbContext<EmailDbContext>(options => 
+if(builder.Environment.IsDevelopment())
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));
-});
+    builder.Services.AddDbContext<EmailDbContext>(options => 
+    {
+        options.UseInMemoryDatabase("EmailDatabase");
+    });
+}
+else
+{
+    builder.Services.AddDbContext<EmailDbContext>(options => 
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+    });
+}
 
 var app = builder.Build();
 

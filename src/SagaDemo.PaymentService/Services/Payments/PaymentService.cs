@@ -20,7 +20,7 @@ public class PaymentService : IPaymentService
 
     public async Task<Transaction> MakeTransactionAsync(Transaction transaction)
     {
-        bool success = Random.Shared.Next(1, 20) <= 8;
+        bool success = Random.Shared.Next(1, 20) > 8;
         if(success)
             transaction.State = TransactionState.Success;
         else
