@@ -45,7 +45,8 @@ public class OrdersController : ControllerBase
             OrderId = order.Id,
             ProductId = order.ProductId,
             UserId = user.ExternalId,
-            Quantity = order.Quantity
+            Quantity = order.Quantity,
+            TotalPrice = order.TotalPrice
         });
         return Ok(order);
     }

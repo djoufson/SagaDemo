@@ -10,4 +10,5 @@ public class PaymentDbCOntext : DbContext
     }
 
     public DbSet<Transaction> Transactions { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
 }

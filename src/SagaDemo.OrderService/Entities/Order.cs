@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using SagaDemo.OrderService.Entities.Base;
+﻿using SagaDemo.OrderService.Entities.Base;
 
 namespace SagaDemo.OrderService.Entities;
 
@@ -12,6 +10,7 @@ public class Order : IEntity<Guid>
     public Product Product { get; set; } = null!;
     public int Quantity { get; set; }
     public OrderState State { get; set; }
+    public decimal TotalPrice => Product.Price * Quantity;
 }
 
 public enum OrderState

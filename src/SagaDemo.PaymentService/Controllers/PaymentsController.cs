@@ -19,7 +19,7 @@ public class PaymentsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> InitiatePayment(TransactionDto transactionDto)
     {
-        Transaction transaction = await _paymentService.MakeTransactionAsync(new Transaction()
+        Transaction? transaction = await _paymentService.MakeTransactionAsync(new Transaction()
         {
             OrderId = transactionDto.OrderId,
             State = TransactionState.Success,
@@ -27,5 +27,12 @@ public class PaymentsController : ControllerBase
         });
 
         return Ok(transaction);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllTransactions()
+    {
+        IReadOnlyList<Transaction> transactions = await _paymentService.GetAllTransactionsAsync();
+        return Ok(transactions);
     }
 }

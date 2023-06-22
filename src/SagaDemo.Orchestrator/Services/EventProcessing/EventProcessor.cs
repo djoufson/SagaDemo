@@ -44,7 +44,8 @@ public class EventProcessor : IEventProcessor
                     command = new MakePaymentCommand()
                     {
                         UserId = orderPlaced.UserId,
-                        OrderId = orderPlaced.OrderId
+                        OrderId = orderPlaced.OrderId,
+                        Amount = orderPlaced.TotalPrice
                     };
                     await orchestrator.RequestMakePaymentAsync(command);
                 }

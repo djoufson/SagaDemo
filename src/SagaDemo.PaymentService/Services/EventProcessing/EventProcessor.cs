@@ -4,6 +4,7 @@ using SagaDemo.PaymentService.Entities;
 using SagaDemo.PaymentService.Events;
 using SagaDemo.PaymentService.Services.Orchestrator;
 using SagaDemo.PaymentService.Services.Payments;
+using SagaDemo.PaymentService.Services.Users;
 
 namespace SagaDemo.PaymentService.Services.EventProcessing;
 
@@ -24,6 +25,7 @@ public class EventProcessor : IEventProcessor
     {
         using var scope = _serviceProvider.CreateScope();
         IPaymentService paymentService = scope.ServiceProvider.GetRequiredService<IPaymentService>();
+        IUserRepository userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
         IOrchestratorClient orchestratorClient = scope.ServiceProvider.GetRequiredService<IOrchestratorClient>();
         Event? @event = JsonSerializer.Deserialize<Event>(message);
         if (@event is null)
@@ -31,6 +33,21 @@ public class EventProcessor : IEventProcessor
 
         switch (@event.EventName)
         {
+            case UserRegistered.EventType:
+                {
+                    UserRegistered? content = JsonSerializer.Deserialize<UserRegistered>(message);
+                    if (content is null)
+                        return;
+
+                    _logger.LogCritical("--> Make payment request : {UserId}", content.Id);
+                    var user = new User()
+                    {
+                        ExternalId = content.Id,
+                        Balance = 2000,
+                    };
+                    await userRepository.AddUserAsync(user);
+                }
+                break;
             case MakePaymentCommand.EventType:
                 {
                     MakePaymentCommand? content = JsonSerializer.Deserialize<MakePaymentCommand>(message);
@@ -38,27 +55,28 @@ public class EventProcessor : IEventProcessor
                         return;
 
                     _logger.LogCritical("--> Make payment request : {OrderId}", content.OrderId);
-                    Transaction transaction = new()
+                    Transaction? transaction = new()
                     {
                         UserId = content.UserId,
                         OrderId = content.OrderId,
+                        Amount = content.Amount,
                         PurchaseDate = DateTime.Now,
                         State = TransactionState.Success,
                     };
                     transaction = await paymentService.MakeTransactionAsync(transaction);
-                    if(transaction.State == TransactionState.Success)
+                    if (transaction is null || transaction.State != TransactionState.Success)
                     {
-                        await orchestratorClient.RaisePaymentSucceededEvent(new PaymentSucceeded()
+                        await orchestratorClient.RaisePaymentFailedEvent(new PaymentFailed()
                         {
-                            Id = transaction.Id,
-                            UserId = transaction.UserId,
-                            OrderId = transaction.OrderId,
-                            PurchaseDate = transaction.PurchaseDate
+                            Id = transaction?.Id ?? Guid.Empty,
+                            UserId = transaction?.UserId ?? Guid.Empty,
+                            OrderId = transaction?.OrderId ?? Guid.Empty,
+                            PurchaseDate = transaction?.PurchaseDate ?? DateTime.Now
                         });
                     }
                     else
                     {
-                        await orchestratorClient.RaisePaymentFailedEvent(new PaymentFailed()
+                        await orchestratorClient.RaisePaymentSucceededEvent(new PaymentSucceeded()
                         {
                             Id = transaction.Id,
                             UserId = transaction.UserId,

@@ -5,6 +5,7 @@ using SagaDemo.PaymentService.Services.EventProcessing;
 using SagaDemo.PaymentService.Services.Jobs;
 using SagaDemo.PaymentService.Services.Orchestrator;
 using SagaDemo.PaymentService.Services.Payments;
+using SagaDemo.PaymentService.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,9 @@ builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSett
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IOrchestratorClient, OrchestratorClient>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddHostedService<OrchestratorSubscriber>();
+builder.Services.AddHostedService<BroadcastSubscriber>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
