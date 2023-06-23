@@ -13,11 +13,14 @@ services:
   sql-server-db:
     container_name: sql-server-db
     image: mcr.microsoft.com/mssql/server:latest
+    user: root
     ports:
-      - "2000:1433"
+      - "1433:1433"
     environment:
       SA_PASSWORD: "Pa55word!"
       ACCEPT_EULA: "Y"
-
+    volumes:
+      - mssqldata:/var/opt/mssql/data
 volumes:
   rabbitmqdata:
+  mssqldata:

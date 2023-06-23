@@ -17,18 +17,45 @@ internal static class Seed
             return;
 
         Console.WriteLine("--> Seeding Data");
-        User user = new()
+        User rosane = new()
         {
             Email = "temgouarosane@gmail.com",
             Name = "Rosane",
             Password = "RosanePassword 1"
         };
-        await dbContext.Users.AddAsync(user);
+
+        User djouf = new()
+        {
+            Email = "djouflegran@gmail.com",
+            Name = "Djoufson",
+            Password = "DjoufPassword 1"
+        };
+
+        User michel = new()
+        {
+            Email = "michelbosseck@gmail.com",
+            Name = "Michel",
+            Password = "MichelPassword 1"
+        };
+
+        await dbContext.Users.AddRangeAsync(rosane, djouf, michel);
         await client.PublishUserRegisteredAsync(new UserRegistered()
         {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email
+            Id = rosane.Id,
+            Name = rosane.Name,
+            Email = rosane.Email
+        });
+        await client.PublishUserRegisteredAsync(new UserRegistered()
+        {
+            Id = djouf.Id,
+            Name = djouf.Name,
+            Email = djouf.Email
+        });
+        await client.PublishUserRegisteredAsync(new UserRegistered()
+        {
+            Id = michel.Id,
+            Name = michel.Name,
+            Email = michel.Email
         });
         await dbContext.SaveChangesAsync();
     }

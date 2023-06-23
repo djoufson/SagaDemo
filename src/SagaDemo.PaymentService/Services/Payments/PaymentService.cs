@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.PaymentService.Data;
 using SagaDemo.PaymentService.Entities;
+using SagaDemo.PaymentService.Exceptions;
 using SagaDemo.PaymentService.Services.Users;
 
 namespace SagaDemo.PaymentService.Services.Payments;
@@ -35,7 +36,10 @@ public class PaymentService : IPaymentService
         if(user is null)
             return null;
         else if(user.Balance - transaction.Amount < 0)
+        {
             transaction.State = TransactionState.Fail;
+            throw new NotEnoughMoneyException();
+        }
 
         // To simulate transaction process
         await Task.Delay(2000);

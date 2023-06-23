@@ -2,6 +2,7 @@ using System.Text.Json;
 using SagaDemo.PaymentService.Commands;
 using SagaDemo.PaymentService.Entities;
 using SagaDemo.PaymentService.Events;
+using SagaDemo.PaymentService.Exceptions;
 using SagaDemo.PaymentService.Services.Orchestrator;
 using SagaDemo.PaymentService.Services.Payments;
 using SagaDemo.PaymentService.Services.Users;
@@ -63,25 +64,41 @@ public class EventProcessor : IEventProcessor
                         PurchaseDate = DateTime.Now,
                         State = TransactionState.Success,
                     };
-                    transaction = await paymentService.MakeTransactionAsync(transaction);
-                    if (transaction is null || transaction.State != TransactionState.Success)
+                    try
                     {
+                        await paymentService.MakeTransactionAsync(transaction);
+                        if (transaction is null || transaction.State != TransactionState.Success)
+                        {
+                            await orchestratorClient.RaisePaymentFailedEvent(new PaymentFailed()
+                            {
+                                Id = transaction?.Id ?? Guid.Empty,
+                                UserId = transaction?.UserId ?? Guid.Empty,
+                                OrderId = transaction?.OrderId ?? Guid.Empty,
+                                PurchaseDate = transaction?.PurchaseDate ?? DateTime.Now,
+                                Reason = "The authenticated user does not exist"
+                            });
+                        }
+                        else
+                        {
+                            await orchestratorClient.RaisePaymentSucceededEvent(new PaymentSucceeded()
+                            {
+                                Id = transaction.Id,
+                                UserId = transaction.UserId,
+                                OrderId = transaction.OrderId,
+                                PurchaseDate = transaction.PurchaseDate
+                            });
+                        }
+                    }
+                    catch (NotEnoughMoneyException e)
+                    {
+                        _logger.LogError("The payment couldn't be proceed: {Reason}", e.Message);
                         await orchestratorClient.RaisePaymentFailedEvent(new PaymentFailed()
                         {
                             Id = transaction?.Id ?? Guid.Empty,
                             UserId = transaction?.UserId ?? Guid.Empty,
                             OrderId = transaction?.OrderId ?? Guid.Empty,
-                            PurchaseDate = transaction?.PurchaseDate ?? DateTime.Now
-                        });
-                    }
-                    else
-                    {
-                        await orchestratorClient.RaisePaymentSucceededEvent(new PaymentSucceeded()
-                        {
-                            Id = transaction.Id,
-                            UserId = transaction.UserId,
-                            OrderId = transaction.OrderId,
-                            PurchaseDate = transaction.PurchaseDate
+                            PurchaseDate = transaction?.PurchaseDate ?? DateTime.Now,
+                            Reason = e.Message
                         });
                     }
                     break;

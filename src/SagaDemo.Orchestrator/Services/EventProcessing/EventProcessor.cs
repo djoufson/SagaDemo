@@ -85,7 +85,8 @@ public class EventProcessor : IEventProcessor
 $@"PaymentID: {payment.Id}
 OrderID: {payment.OrderId}
 Payment Date: {payment.PurchaseDate.ToUniversalTime()} GMT
-Status: Failed ✅"
+Status: Failed ❌
+Motif: {payment.Reason}"
                     };
                     await orchestrator.RequestSendEmailAsync(command);
                 }
