@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.AuthService.Configurations;
 using SagaDemo.AuthService.Data;
+using SagaDemo.AuthService.Extensions;
 using SagaDemo.AuthService.Services.Authentication;
 using SagaDemo.AuthService.Services.RabbitMq;
 using SagaDemo.AuthService.Services.Users;
@@ -48,5 +49,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.PrepDatabase();
 
 app.Run();

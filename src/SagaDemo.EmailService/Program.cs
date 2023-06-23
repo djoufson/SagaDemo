@@ -3,6 +3,7 @@ using System.Net.Mail;
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.EmailService.Configurations;
 using SagaDemo.EmailService.Data;
+using SagaDemo.EmailService.Extensions;
 using SagaDemo.EmailService.Services.Emails;
 using SagaDemo.EmailService.Services.EventProcessing;
 using SagaDemo.EmailService.Services.Jobs;
@@ -64,5 +65,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.PrepDatabase();
 
 app.Run();

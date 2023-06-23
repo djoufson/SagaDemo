@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.PaymentService.Configurations;
 using SagaDemo.PaymentService.Data;
+using SagaDemo.PaymentService.Extensions;
 using SagaDemo.PaymentService.Services.EventProcessing;
 using SagaDemo.PaymentService.Services.Jobs;
 using SagaDemo.PaymentService.Services.Orchestrator;
@@ -51,5 +52,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.PrepDatabase();
 
 app.Run();
