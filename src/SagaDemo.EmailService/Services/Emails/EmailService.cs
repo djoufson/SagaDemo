@@ -1,4 +1,6 @@
 ﻿using System.Net.Mail;
+using Polly;
+using Polly.Retry;
 using SagaDemo.EmailService.Configurations;
 using SagaDemo.EmailService.Data;
 using SagaDemo.EmailService.Entities;
@@ -11,6 +13,7 @@ public class EmailService : IEmailService
     private readonly EmailDbContext _dbContext;
     private readonly SmtpClient _smtpClient;
     private readonly EmailSettings _emailSettings;
+    private const int _delay = 1500;
 
     public EmailService(
         EmailDbContext dbContext,
@@ -42,20 +45,21 @@ public class EmailService : IEmailService
         var message = new MailMessage(
             from: _emailSettings.FromEmail,
             to: emailAddress,
-            // to: "djouflegran@gmail.com",
             subject: subject,
             body: body
         );
 
-        try
-        {
-            await _smtpClient.SendMailAsync(message);
-            return true;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to send the email");
-            return false;
-        }
+        AsyncRetryPolicy policy = Policy
+            .Handle<Exception>()
+            .WaitAndRetryAsync(3, attempt => 
+            {
+                _logger.LogWarning("--> Email failed to send. Will retry after {Time}ms", attempt * _delay);
+                return TimeSpan.FromMilliseconds(_delay * attempt);
+            });
+
+        PolicyResult result = await policy
+            .ExecuteAndCaptureAsync(() => _smtpClient.SendMailAsync(message));
+
+        return result.FinalException is null;
     }
 }

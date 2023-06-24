@@ -32,8 +32,6 @@ public class OrchestratorClient : IOrchestratorClient
             _channel?.ExchangeDeclare("orchestrator", ExchangeType.Direct);
             if (_connection is not null)
                 _connection.ConnectionShutdown += (_, __) => _logger.LogCritical("RabbitMQ connection shut down");
-
-            _logger.LogInformation("Successfully connected to RabbitMQ direct exchange");
         }
         catch (Exception e)
         {

@@ -40,7 +40,7 @@ public class EventProcessor : IEventProcessor
                     if (content is null)
                         return;
 
-                    _logger.LogCritical("--> Make payment request : {UserId}", content.Id);
+                    _logger.LogCritical("--> User created : {UserId}", content.Id);
                     var user = new User()
                     {
                         ExternalId = content.Id,
@@ -75,7 +75,7 @@ public class EventProcessor : IEventProcessor
                                 UserId = transaction?.UserId ?? Guid.Empty,
                                 OrderId = transaction?.OrderId ?? Guid.Empty,
                                 PurchaseDate = transaction?.PurchaseDate ?? DateTime.Now,
-                                Reason = "The authenticated user does not exist"
+                                Reason = "The user is not recognized"
                             });
                         }
                         else

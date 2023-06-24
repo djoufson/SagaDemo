@@ -67,7 +67,6 @@ public class EventProcessor : IEventProcessor
                         State = EmailState.Pending
                     };
 
-                    // TODO: Design here to retry 3 times
                     bool success = await emailService.SendAsync(email);
                     if(success)
                     {

@@ -38,14 +38,18 @@ public class PaymentService : IPaymentService
         else if(user.Balance - transaction.Amount < 0)
         {
             transaction.State = TransactionState.Fail;
-            throw new NotEnoughMoneyException();
         }
 
         // To simulate transaction process
         await Task.Delay(2000);
         await _dbContext.Transactions.AddAsync(transaction);
-        await _userRepository.UpdateBalanceAsync(user.Id, user.Balance - transaction.Amount);
+        if(transaction.State == TransactionState.Success)
+            await _userRepository.UpdateBalanceAsync(user.Id, user.Balance - transaction.Amount);
+
         await _dbContext.SaveChangesAsync();
+        if(transaction.State != TransactionState.Success)
+            throw new NotEnoughMoneyException();
+
         return transaction;
     }
 
