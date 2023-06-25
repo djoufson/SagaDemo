@@ -63,7 +63,8 @@ else
 }
 
 var app = builder.Build();
-app.SeedData();
+if(app.Environment.IsDevelopment())
+    app.SeedData();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
