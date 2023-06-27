@@ -1,5 +1,9 @@
 version: "2.12.2"
 
+networks:
+  dev:
+    driver: bridge
+
 services:
   rabbitmq:
     image: rabbitmq:latest
@@ -10,17 +14,41 @@ services:
     volumes:
       - rabbitmqdata:/var/lib/rabbitmq
     hostname: rabbitmq
-  sql-server-db:
-    container_name: sql-server-db
-    image: mcr.microsoft.com/mssql/server:latest
-    user: root
-    ports:
-      - "1433:1433"
+    networks:
+      - dev
+
+  # email_srv:
+  #   image: djoufson/sagademo.emailservice
+  #   depends_on:
+  #     - "rabbitmq"
+  #     - "postgres_db"
+  #   container_name: sagademo.email-service
+  #   ports:
+  #     - 5000:80
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - ConnectionStrings__Postgres=User ID=postgres;Password=postgres;Server=postgres_db;Port=5432;Database=EmailService;IntegratedSecurity=true;Pooling=true;
+  #     - ASPNETCORE_URLS=http://+:80
+  #   networks:
+  #     - dev
+
+  postgres_db:
+    image: postgres:latest
+    container_name: postgres_db
     environment:
-      SA_PASSWORD: "Pa55word!"
-      ACCEPT_EULA: "Y"
+      - POSTGRES_USER=postgres
+      - POSTGES_PASSWOD=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5433:5433
+    restart: always
     volumes:
-      - mssqldata:/var/opt/mssql/data
+      - appdata:/var/lib/postgresql/data
+    networks:
+      - dev
 volumes:
   rabbitmqdata:
   mssqldata:
+  appdata:

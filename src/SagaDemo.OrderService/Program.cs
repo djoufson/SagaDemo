@@ -58,7 +58,7 @@ else
 {
     builder.Services.AddDbContext<OrdersDbContext>( options =>
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"));
     });
 }
 

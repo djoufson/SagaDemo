@@ -28,21 +28,28 @@ public class BroadcastSubscriber : BackgroundService
 
     public void InitializeRabbitMq()
     {
-        var factory = new ConnectionFactory()
+        try
         {
-            HostName = _settings.Host,
-            Port = _settings.Port
-        };
-        _connection = factory.CreateConnection();
-        _channel = _connection?.CreateModel();
-        _channel?.ExchangeDeclare("broadcast", ExchangeType.Fanout);
-        _queueName = _channel?.QueueDeclare().QueueName;
+            var factory = new ConnectionFactory()
+            {
+                HostName = _settings.Host,
+                Port = _settings.Port
+            };
+            _connection = factory.CreateConnection();
+            _channel = _connection?.CreateModel();
+            _channel?.ExchangeDeclare("broadcast", ExchangeType.Fanout);
+            _queueName = _channel?.QueueDeclare().QueueName;
 
-        _channel?.QueueBind(_queueName, "broadcast", "");
-        if (_connection is not null)
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
+            _channel?.QueueBind(_queueName, "broadcast", "");
+            if (_connection is not null)
+                _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
 
-        _logger.LogInformation("Successfully connected to RabbitMQ");
+            _logger.LogInformation("Successfully connected to RabbitMQ");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Unable to connect to RabbitMQ : {Message}", e.Message);
+        }
     }
 
     private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
@@ -52,9 +59,15 @@ public class BroadcastSubscriber : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var consumer = new EventingBasicConsumer(_channel);
-        consumer.Received += EventReceived;
-        _channel.BasicConsume(_queueName, true, consumer);
+        try
+        {
+            var consumer = new EventingBasicConsumer(_channel);
+            consumer.Received += EventReceived;
+            _channel.BasicConsume(_queueName, true, consumer);
+        }
+        catch (Exception)
+        {
+        }
         return Task.CompletedTask;
     }
 

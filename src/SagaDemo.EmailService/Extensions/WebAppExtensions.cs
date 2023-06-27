@@ -14,6 +14,7 @@ public static class WebAppExtensions
             var dbContext = scope.ServiceProvider.GetRequiredService<EmailDbContext>();
             logger.LogInformation("--> Attempting to apply migrations . . .");
             dbContext.Database.Migrate();
+            logger.LogInformation("--> Migrations applied successfully");
         }
         return app;
     }

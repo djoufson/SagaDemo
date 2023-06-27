@@ -1,0 +1,116 @@
+apiVersion: v1
+# Kind for volume chain
+kind: PersistentVolume
+metadata:
+  # Name the persistent chain
+  name: postgresdb-persistent-volume
+  # Labels for identifying PV
+  labels:
+    type: local
+    app: postgresdb
+spec:
+  storageClassName: manual
+  capacity:
+    # PV Storage capacity
+    storage: 8Gi
+  # A db can write and read from volumes to multiple pods
+  accessModes:
+    - ReadWriteMany
+  # Specify the path to persistent the volumes  
+  hostPath:
+    path: "/data/db"
+---
+apiVersion: v1
+# define a resource for volume chain
+kind: PersistentVolumeClaim
+metadata:
+  # Name the volume chain
+  name: db-persistent-volume-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    # Allow ReadWrite to multiple pods
+    - ReadWriteMany
+  # PVC requesting resources
+  resources:
+    requests:
+      # the PVC storage
+      storage: 8Gi
+---
+apiVersion: v1
+# Kind for kubernetes ConfigMap
+kind: ConfigMap
+metadata:
+  # Name your ConfigMap
+  name: db-secret-credentials
+  labels:
+    app: postgresdb
+data:
+  # User DB
+  POSTGRES_DB: sagaDemoDB
+  # Db user
+  POSTGRES_USER: sa
+  # Db password
+  POSTGRES_PASSWORD: Pa55word!
+---
+# Kubernetes API version
+apiVersion: apps/v1
+# Deployment object
+kind: Deployment
+metadata:
+  # The name of the Deployment
+  name: postgresdb
+spec:
+  # Replicas for this Deployment
+  replicas: 3
+  selector:
+    # labels the pods
+    matchLabels:
+      app: postgresdb
+  template:
+    metadata:
+      labels:
+        # The label the pods created from the pod template should have
+        app: postgresdb
+    spec:
+      containers:
+        # The container name to execute pods
+        - name: postgresdb
+          # pull postgresimage from docker hub
+          image: postgres
+          ports:
+            # Assign ports to expose container
+            - containerPort: 5432
+          envFrom:
+            # Load the environment variables/PostgresSQL credentials
+            - configMapRef:
+                # This should be the ConfigMap name created earlier
+                name: db-secret-credentials
+          volumeMounts:
+            # The volume mounts  for the container
+            - mountPath: /var/lib/postgres/data
+              name: db-data
+      # Volumes attached to the pod
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            # reference the PersistentVolumeClaim
+            claimName: db-persistent-volume-claim
+---
+apiVersion: v1
+# Kind for service
+kind: Service
+metadata:
+  # Name your service
+  name: postgresdb
+  labels:
+    app: postgresdb
+spec:
+  # Choose how to expose your service
+  type: NodePort
+  ports:
+    # The port number to expose the service
+    - port: 5432
+  # Pod to route service traffic  
+  selector:
+    app: postgresdb

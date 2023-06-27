@@ -41,7 +41,6 @@ public class EmailService : IEmailService
 
     private async Task<bool> Send(string emailAddress, string subject, string body)
     {
-        Console.WriteLine(emailAddress);
         var message = new MailMessage(
             from: _emailSettings.FromEmail,
             to: emailAddress,
@@ -59,7 +58,9 @@ public class EmailService : IEmailService
 
         PolicyResult result = await policy
             .ExecuteAndCaptureAsync(() => _smtpClient.SendMailAsync(message));
-
-        return result.FinalException is null;
+        bool success = result.FinalException is null;
+        if(!success)
+            _logger.LogError(result.FinalException, "--> Email definitely failed to send.");
+        return success;
     }
 }

@@ -25,7 +25,7 @@ else
 {
     builder.Services.AddDbContext<AuthDbContext>(options => 
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"));
     });
 }
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();

@@ -28,7 +28,7 @@ else
 {
     builder.Services.AddDbContext<PaymentDbCOntext>(options =>
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"));
     });
 }
 builder.Services.AddSingleton(_ => builder.Configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>());
